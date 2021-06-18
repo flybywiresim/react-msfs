@@ -1,0 +1,93 @@
+/* eslint-disable camelcase, max-classes-per-file */
+
+import React, { FC, useEffect, useRef } from 'react';
+
+declare class NetBingMap extends HTMLElement {
+    m_configs: BingMapConfig[]
+
+    m_configId: number
+
+    m_params: Record<string, unknown>
+
+    addConfig(config: BingMapConfig): void
+
+    setConfig(id: number): void
+
+    setParams(params: Record<string, unknown>)
+
+    setBingId(id: string): void
+
+    setVisible(visible: boolean): void
+}
+
+declare class BingMapConfig {}
+
+declare class SvgMapConfig {
+    generateBing(_id: number): BingMapConfig
+
+    load(path: string, callback): BingMapConfig
+}
+
+declare class LatLongAlt {
+    lat: number;
+
+    long: number;
+
+    constructor(
+        lat: number,
+        long: number
+    )
+}
+
+const RANGE_CONSTANT = 1852;
+const DEFAULT_RANGE = 80;
+
+export type BingMapProps = {
+    configFolder: string,
+    mapId: string,
+    centerLla: { lat: number, long: number },
+    range?: number,
+}
+
+export const BingMap: FC<BingMapProps> = ({ configFolder, mapId, range = DEFAULT_RANGE, centerLla }) => {
+    const mapRef = useRef<NetBingMap>();
+
+    useEffect(() => {
+        if (mapRef.current) {
+            const svgMapConfig = new SvgMapConfig();
+
+            svgMapConfig.load(configFolder, () => {
+                console.log(`[ReactBingMap (${mapId})] NetBingMap config loaded`);
+
+                mapRef.current.addConfig(svgMapConfig.generateBing(0));
+                mapRef.current.setConfig(0);
+
+                mapRef.current.setBingId(mapId);
+                mapRef.current.setVisible(true);
+
+                const lla = new LatLongAlt(centerLla.lat, centerLla.long);
+                const radius = (range / 2) * RANGE_CONSTANT;
+
+                mapRef.current.setParams({ lla, radius });
+
+                console.log(`[ReactBingMap (${mapId})] NetBingMap initialized and configured with config id # ${mapRef.current.m_configId} out of ${mapRef.current.m_configs.length} configs`);
+            });
+        }
+    }, [mapRef]);
+
+    useEffect(() => {
+        if (mapRef.current) {
+            const lla = new LatLongAlt(centerLla.lat, centerLla.long);
+            const radius = (range / 2) * RANGE_CONSTANT;
+
+            mapRef.current.setParams({ lla, radius });
+        }
+    }, [range, centerLla]);
+
+    return (
+        <>
+            {/* @ts-ignore */}
+            <bing-map ref={mapRef} />
+        </>
+    );
+};
