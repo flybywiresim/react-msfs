@@ -36,9 +36,9 @@ export const CanvasMap: FC<BingMapProps> = ({ bingConfigFolder, mapId, centerLla
 
     return (
         <>
-            <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={range} />
-
             <CanvasLayer onUpdatedDrawingCanvasController={setLayerController} />
+
+            <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={range} />
         </>
     );
 };

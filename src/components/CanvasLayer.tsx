@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 export type CanvasLayerProps = {
-    onUpdatedDrawingCanvasController: (controller: CanvasLayerController) => void,
-}
+    onUpdatedDrawingCanvasController: (controller: CanvasLayerController) => void;
+};
 
 export const CanvasLayer: FC<CanvasLayerProps> = ({ onUpdatedDrawingCanvasController }) => {
     const canvasRef = useRef<HTMLCanvasElement>();
@@ -23,22 +23,13 @@ export const CanvasLayer: FC<CanvasLayerProps> = ({ onUpdatedDrawingCanvasContro
         }
     }, [context]);
 
-    return (
-        <canvas
-            ref={canvasRef}
-            width="100%"
-            height="100%"
-        />
-    );
+    return <canvas ref={canvasRef} style={{ position: 'absolute' }} width="100%" height="100%" />;
 };
 
 export type CanvasLayerControllerUsage = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => void;
 
 export class CanvasLayerController {
-    constructor(
-        private canvas: HTMLCanvasElement,
-        private context: CanvasRenderingContext2D,
-    ) {}
+    constructor(private canvas: HTMLCanvasElement, private context: CanvasRenderingContext2D) {}
 
     use(func: CanvasLayerControllerUsage) {
         func(this.canvas, this.context);
