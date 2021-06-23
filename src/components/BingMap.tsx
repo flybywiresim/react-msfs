@@ -3,51 +3,40 @@
 import React, { FC, useEffect, useRef } from 'react';
 
 declare class NetBingMap extends HTMLElement {
-    m_configs: BingMapConfig[]
-
-    m_configId: number
-
-    m_params: Record<string, unknown>
-
-    addConfig(config: BingMapConfig): void
-
-    setConfig(id: number): void
-
-    setParams(params: Record<string, unknown>)
-
-    setBingId(id: string): void
-
-    setVisible(visible: boolean): void
+    m_configs: BingMapConfig[];
+    m_configId: number;
+    m_params: Record<string, unknown>;
+    addConfig(config: BingMapConfig): void;
+    setConfig(id: number): void;
+    setParams(params: Record<string, unknown>);
+    setBingId(id: string): void;
+    setVisible(visible: boolean): void;
 }
 
 declare class BingMapConfig {}
 
 declare class SvgMapConfig {
-    generateBing(_id: number): BingMapConfig
+    generateBing(_id: number): BingMapConfig;
 
-    load(path: string, callback): BingMapConfig
+    load(path: string, callback): BingMapConfig;
 }
 
 declare class LatLongAlt {
     lat: number;
-
     long: number;
 
-    constructor(
-        lat: number,
-        long: number
-    )
+    constructor(lat: number, long: number);
 }
 
 const RANGE_CONSTANT = 1852;
 const DEFAULT_RANGE = 80;
 
 export type BingMapProps = {
-    configFolder: string,
-    mapId: string,
-    centerLla: { lat: number, long: number },
-    range?: number,
-}
+    configFolder: string;
+    mapId: string;
+    centerLla: { lat: number; long: number };
+    range?: number;
+};
 
 export const BingMap: FC<BingMapProps> = ({ configFolder, mapId, range = DEFAULT_RANGE, centerLla }) => {
     const mapRef = useRef<NetBingMap>();
@@ -70,7 +59,9 @@ export const BingMap: FC<BingMapProps> = ({ configFolder, mapId, range = DEFAULT
 
                 mapRef.current.setParams({ lla, radius });
 
-                console.log(`[ReactBingMap (${mapId})] NetBingMap initialized and configured with config id # ${mapRef.current.m_configId} out of ${mapRef.current.m_configs.length} configs`);
+                console.log(
+                    `[ReactBingMap (${mapId})] NetBingMap initialized and configured with config id # ${mapRef.current.m_configId} out of ${mapRef.current.m_configs.length} configs`
+                );
             });
         }
     }, [mapRef]);
