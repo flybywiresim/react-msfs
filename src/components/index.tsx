@@ -9,6 +9,7 @@ export type BingMapProps = {
     centerLla: { lat: number; long: number };
     range?: number;
     heading?: number;
+    rotation?: number;
 };
 
 const DEFAULT_RANGE = 80;
@@ -17,7 +18,13 @@ let rotation = 0;
 
 const colors = ['blue', 'red', 'green', 'yellow', 'purple'];
 
-export const CanvasMap: FC<BingMapProps> = ({ bingConfigFolder, mapId, centerLla, range = DEFAULT_RANGE }) => {
+export const CanvasMap: FC<BingMapProps> = ({
+    bingConfigFolder,
+    mapId,
+    centerLla,
+    range = DEFAULT_RANGE,
+    rotation = 0
+}) => {
     const [layerController, setLayerController] = useState<CanvasLayerController>();
 
     useUpdate((deltaTime: number) => {
@@ -35,10 +42,10 @@ export const CanvasMap: FC<BingMapProps> = ({ bingConfigFolder, mapId, centerLla
     });
 
     return (
-        <>
+        <div style={{ transform: `rotateZ(${rotation}deg)` }}>
             <CanvasLayer onUpdatedDrawingCanvasController={setLayerController} />
 
             <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={range} />
-        </>
+        </div>
     );
 };
