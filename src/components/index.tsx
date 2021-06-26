@@ -1,8 +1,7 @@
-import React, { FC, RefObject, useEffect, useRef, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import { BingMap } from './BingMap';
 import { CanvasLayer, CanvasLayerController } from './CanvasLayer';
-import { useUpdate } from '../hooks';
-import map from '../../../../Pages/map';
+import { SimVarProvider, useUpdate } from '../hooks';
 
 export type BingMapProps = {
     bingConfigFolder: string;
@@ -15,8 +14,6 @@ export type BingMapProps = {
 };
 
 const DEFAULT_RANGE = 80;
-
-const rotation = 0;
 
 const colors = ['blue', 'red', 'green', 'yellow', 'purple'];
 
@@ -50,6 +47,7 @@ export const CanvasMap: FC<BingMapProps> = ({
     if (mapContainerRef.current) {
         mapSize = Math.hypot(mapContainerRef.current.clientWidth, mapContainerRef.current.clientHeight);
     }
+
     return (
         <div ref={mapContainerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
             <div
@@ -77,7 +75,11 @@ export const CanvasMap: FC<BingMapProps> = ({
                         left: 0,
                     }}
                 >
-                    {children}
+                    <SimVarProvider>
+                        {React.Children.map(children, (child) => (
+                            React.cloneElement(child, { centerLla, range })
+                        ))}
+                    </SimVarProvider>
                 </div>
             </div>
         </div>
