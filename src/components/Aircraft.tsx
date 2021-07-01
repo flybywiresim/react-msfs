@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useSimVar } from '../hooks';
 import LatLon from 'geodesy/latlon-ellipsoidal-vincenty.js';
+import { useSimVar } from '../hooks';
+import { CanvasLayerController } from './CanvasLayer';
+import { bearingToRad } from '../utils';
 
 interface AircraftProps {
     iconPath: string;
     centerLla?: { lat: number, long: number };
     range?: number;
+    rotation?: number;
+    layerController?: CanvasLayerController;
     style?: React.CSSProperties;
 }
 
@@ -17,8 +21,6 @@ export const Aircraft: React.FC<AircraftProps> = ({ iconPath, centerLla, range, 
     const [latitude] = useSimVar('A:PLANE LATITUDE', 'Degrees');
     const [longitude] = useSimVar('A:PLANE LONGITUDE', 'Degrees');
 
-    const bearingToRad = (bearing) => (450 - bearing) % 360 * (Math.PI / 180)
-
     const updatePosition = () => {
         const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
         const planeLatLong = new LatLon(latitude, longitude);
@@ -28,7 +30,7 @@ export const Aircraft: React.FC<AircraftProps> = ({ iconPath, centerLla, range, 
 
         setDx(distance * Math.cos(angle));
         setDy(distance * -Math.sin(angle));
-    }
+    };
 
     useEffect(updatePosition, [centerLla]);
     useEffect(updatePosition, [range]);

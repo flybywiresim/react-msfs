@@ -1,7 +1,7 @@
 import React, { FC, useRef, useState } from 'react';
 import { BingMap } from './BingMap';
 import { CanvasLayer, CanvasLayerController } from './CanvasLayer';
-import { SimVarProvider, useUpdate } from '../hooks';
+import { SimVarProvider } from '../hooks';
 
 export type BingMapProps = {
     bingConfigFolder: string;
@@ -15,8 +15,6 @@ export type BingMapProps = {
 
 const DEFAULT_RANGE = 80;
 
-const colors = ['blue', 'red', 'green', 'yellow', 'purple'];
-
 export const CanvasMap: FC<BingMapProps> = ({
     bingConfigFolder,
     mapId,
@@ -28,20 +26,6 @@ export const CanvasMap: FC<BingMapProps> = ({
     const [layerController, setLayerController] = useState<CanvasLayerController>();
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
-
-    useUpdate((deltaTime: number) => {
-        layerController?.use((canvas, context) => {
-            rotation += 1000 * deltaTime;
-            rotation %= 360;
-
-            context.clearRect(0, 0, canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
-            // context.rotate(rotation * (Math.PI / 180));
-            const colorIndex = Math.round(Math.random() * colors.length);
-            // console.log(`color: ${colorIndex}`);
-            context.fillStyle = colors[colorIndex];
-            context.fillRect(10, 10, 50, 50);
-        });
-    });
 
     let mapSize;
     if (mapContainerRef.current) {
@@ -61,7 +45,7 @@ export const CanvasMap: FC<BingMapProps> = ({
                     top: '50%',
                 }}
             >
-                <CanvasLayer onUpdatedDrawingCanvasController={setLayerController} />
+                <CanvasLayer onUpdatedDrawingCanvasController={setLayerController} containerRef={mapContainerRef} />
                 <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={range} />
                 <div
                     style={{
@@ -76,8 +60,8 @@ export const CanvasMap: FC<BingMapProps> = ({
                     }}
                 >
                     <SimVarProvider>
-                        {React.Children.map(children, (child) => (
-                            React.cloneElement(child, { centerLla, range })
+                        {React.Children.map(children, (child: any) => (
+                            React.cloneElement(child, { centerLla, range, rotation, layerController })
                         ))}
                     </SimVarProvider>
                 </div>

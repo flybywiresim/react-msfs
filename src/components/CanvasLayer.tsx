@@ -1,10 +1,11 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, RefObject, useEffect, useRef, useState } from 'react';
 
 export type CanvasLayerProps = {
     onUpdatedDrawingCanvasController: (controller: CanvasLayerController) => void;
+    containerRef: RefObject<HTMLDivElement>;
 };
 
-export const CanvasLayer: FC<CanvasLayerProps> = ({ onUpdatedDrawingCanvasController }) => {
+export const CanvasLayer: FC<CanvasLayerProps> = ({ onUpdatedDrawingCanvasController, containerRef }) => {
     const canvasRef = useRef<HTMLCanvasElement>();
 
     const [context, setContext] = useState<CanvasRenderingContext2D>();
@@ -23,7 +24,19 @@ export const CanvasLayer: FC<CanvasLayerProps> = ({ onUpdatedDrawingCanvasContro
         }
     }, [context]);
 
-    return <canvas ref={canvasRef} style={{ position: 'absolute' }} width="100%" height="100%" />;
+    let mapSize;
+    if (containerRef.current) {
+        mapSize = Math.hypot(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    }
+
+    return (
+        <canvas
+            ref={canvasRef}
+            style={{ position: 'absolute' }}
+            width={mapSize}
+            height={mapSize}
+        />
+    );
 };
 
 export type CanvasLayerControllerUsage = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => void;
