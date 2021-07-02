@@ -1,2 +1,2 @@
-export * from './components/Aircraft';
+export * from './components/Icon';
 export * from './components/Route';

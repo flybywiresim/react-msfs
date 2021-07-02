@@ -2,6 +2,8 @@ import React, { FC, useRef, useState } from 'react';
 import { BingMap } from './BingMap';
 import { CanvasLayer, CanvasLayerController } from './CanvasLayer';
 import { SimVarProvider } from '../hooks';
+import { Route } from './Route';
+import { Icon } from './Icon';
 
 export type BingMapProps = {
     bingConfigFolder: string;
@@ -23,7 +25,8 @@ export const CanvasMap: FC<BingMapProps> = ({
     rotation = 0,
     children = null,
 }) => {
-    const [layerController, setLayerController] = useState<CanvasLayerController>();
+    const [mapLayerController, setMapLayerController] = useState<CanvasLayerController>();
+    const [iconLayerController, setIconLayerController] = useState<CanvasLayerController>();
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -45,7 +48,8 @@ export const CanvasMap: FC<BingMapProps> = ({
                     top: '50%',
                 }}
             >
-                <CanvasLayer onUpdatedDrawingCanvasController={setLayerController} containerRef={mapContainerRef} />
+                <CanvasLayer onUpdatedDrawingCanvasController={setMapLayerController} containerRef={mapContainerRef} />
+                <CanvasLayer onUpdatedDrawingCanvasController={setIconLayerController} containerRef={mapContainerRef} />
                 <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={range} />
                 <div
                     style={{
@@ -60,9 +64,15 @@ export const CanvasMap: FC<BingMapProps> = ({
                     }}
                 >
                     <SimVarProvider>
-                        {React.Children.map(children, (child: any) => (
-                            React.cloneElement(child, { centerLla, range, rotation, layerController })
-                        ))}
+                        {React.Children.map(children, (child: any) => {
+                            if (child.type === Route) {
+                                return React.cloneElement(child, { layerController: mapLayerController, centerLla, range, rotation });
+                            }
+                            if (child.type === Icon) {
+                                return React.cloneElement(child, { layerController: iconLayerController, centerLla, range });
+                            }
+                            return child;
+                        })}
                     </SimVarProvider>
                 </div>
             </div>
