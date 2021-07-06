@@ -3,7 +3,7 @@ import LatLon from 'geodesy/latlon-ellipsoidal-vincenty.js';
 import { CanvasLayerController } from './CanvasLayer';
 import { bearingToRad, degToRad } from '../utils';
 
-interface AircraftProps {
+interface IconProps {
     iconPath: string;
     iconWidth: number;
     iconHeight: number;
@@ -16,7 +16,19 @@ interface AircraftProps {
     range?: number;
 }
 
-export const Icon: React.FC<AircraftProps> = ({ iconPath, iconWidth, iconHeight, positionLatLong, rotation, layerController, centerLla, range }) => {
+/**
+ * Places an icon with given parameters on the icon CanvasLayer
+ * @param iconPath Absolute path for icon image
+ * @param iconWidth Width of icon in px
+ * @param iconHeight Height of icon in px
+ * @param positionLatLong Latitude and Longitude of icon
+ * @param rotation Rotation of icon in degrees
+ * @param layerController (Inherited from CanvasMap)
+ * @param centerLla (Inherited from CanvasMap)
+ * @param range (Inherited from CanvasMap)
+ * @constructor
+ */
+export const Icon: React.FC<IconProps> = ({ iconPath, iconWidth, iconHeight, positionLatLong, rotation, layerController, centerLla, range }) => {
     const [dx, setDx] = useState(0);
     const [dy, setDy] = useState(0);
 

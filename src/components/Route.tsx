@@ -3,9 +3,18 @@ import LatLon from 'geodesy/latlon-ellipsoidal-vincenty.js';
 import { CanvasLayerController } from './CanvasLayer';
 import { bearingToRad, degToRad } from '../utils';
 
+export interface Leg {
+    wpt1: WayPoint;
+    wpt2: WayPoint;
+}
+
+export interface Transition {
+    radius: number;
+}
+
 interface RouteProps {
-    legs: any[];
-    transitions: any[];
+    legs: Leg[];
+    transitions: Transition[];
     strokeWidth: number;
     strokeColor: string;
     outlineWidth: number;
@@ -21,6 +30,22 @@ interface RouteProps {
     rotation?: number;
 }
 
+/**
+ * Draws route with given parameters on the map CanvasLayer
+ * @param legs List of legs
+ * @param transitions List of transitions, Transition at index n is the transition before leg at index n
+ * @param strokeWidth Route stroke width
+ * @param strokeColor Route stroke color
+ * @param outlineWidth Route outline width (must be larger than strokeWidth to be visible)
+ * @param outlineColor Route outline color
+ * @param fontFamily Waypoint identifier font family
+ * @param fontSize Waypoint identifier font size
+ * @param fontColor Waypoint identifier font color
+ * @param centerLla (Inherited from CanvasMap)
+ * @param range (Inherited from CanvasMap)
+ * @param rotation (Inherited from CanvasMap)
+ * @param layerController (Inherited from CanvasMap)
+ */
 export const Route: React.FC<RouteProps> = ({
     legs, transitions, strokeWidth, strokeColor, outlineWidth, outlineColor,
     fontFamily, fontSize, fontColor, centerLla, range, rotation, layerController,
