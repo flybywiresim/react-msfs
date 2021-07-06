@@ -48,7 +48,7 @@ export const Icon: React.FC<AircraftProps> = ({ iconPath, iconWidth, iconHeight,
         });
     };
 
-    useEffect(updatePosition, [positionLatLong, centerLla, range]);
+    useEffect(updatePosition, [positionLatLong, centerLla, range, layerController]);
     useEffect(repaint, [dx, dy, iconPath, iconWidth, iconHeight, rotation, layerController]);
 
     return <></>;

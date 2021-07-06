@@ -1,14 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import LatLon from 'geodesy/latlon-ellipsoidal-vincenty.js';
 import { CanvasLayerController } from './CanvasLayer';
 import { bearingToRad, degToRad } from '../utils';
 
 interface RouteProps {
-    centerLla?: { lat: number, long: number };
-    range?: number;
-    rotation?: number;
-    layerController?: CanvasLayerController;
-    waypoints: any[];
+    legs: any[];
+    transitions: any[];
     strokeWidth: number;
     strokeColor: string;
     outlineWidth: number;
@@ -16,42 +13,66 @@ interface RouteProps {
     fontFamily: string;
     fontSize: number;
     fontColor: string;
+
+    // Inherited from CanvasMap
+    layerController?: CanvasLayerController;
+    centerLla?: { lat: number, long: number };
+    range?: number;
+    rotation?: number;
 }
 
 export const Route: React.FC<RouteProps> = ({
-    centerLla, range, rotation, layerController, waypoints,
-    strokeWidth, strokeColor, outlineWidth, outlineColor,
-    fontFamily, fontSize, fontColor,
+    legs, transitions, strokeWidth, strokeColor, outlineWidth, outlineColor,
+    fontFamily, fontSize, fontColor, centerLla, range, rotation, layerController,
 }) => {
-    useEffect(() => {
+    const [dx, setDx] = useState(0);
+    const [dy, setDy] = useState(0);
+
+    const latLonFromWaypoint = (waypoint: WayPoint) => new LatLon(waypoint.infos.coordinates.lat, waypoint.infos.coordinates.long);
+
+    const updatePosition = () => {
         const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
-        const startLatLong = new LatLon(waypoints[0].infos.coordinates.lat, waypoints[1].infos.coordinates.long);
+        const startLatLong = latLonFromWaypoint(legs[0].wpt1);
 
         const distanceToStart = (mapLatLong.distanceTo(startLatLong)) / (1.29 * range);
         const angleToStart = bearingToRad(mapLatLong.initialBearingTo(startLatLong)) || 0;
 
-        const dx = distanceToStart * Math.cos(angleToStart);
-        const dy = distanceToStart * -Math.sin(angleToStart);
+        setDx(distanceToStart * Math.cos(angleToStart));
+        setDy(distanceToStart * -Math.sin(angleToStart));
+    };
 
+    const repaint = () => {
         layerController?.use((canvas, context) => {
             let [x, y] = [(canvas.clientWidth / 2) + dx, (canvas.clientHeight / 2) + dy];
 
             context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-            context.beginPath();
             context.moveTo(x, y);
+            context.beginPath();
             context.font = `${fontSize}px ${fontFamily}`;
             context.fillStyle = fontColor;
-            for (const waypoint of waypoints) {
-                const distance = (waypoint.distanceInFP * canvas.clientWidth) / range;
-                const angle = bearingToRad(waypoint.bearingInFP);
+            for (let i = 0; i < legs.length - 1; i++) {
+                const leg1wpt1 = latLonFromWaypoint(legs[i].wpt1);
+                const leg1wpt2 = latLonFromWaypoint(legs[i].wpt2);
+                const leg2wpt1 = latLonFromWaypoint(legs[i + 1].wpt1);
+                const leg2wpt2 = latLonFromWaypoint(legs[i + 1].wpt2);
+                const leg1dist = (leg1wpt1.distanceTo(leg1wpt2) * canvas.clientWidth) / (1852 * range);
+                const leg1angle = bearingToRad(leg1wpt1.initialBearingTo(leg1wpt2));
+                const leg2dist = (leg2wpt1.distanceTo(leg2wpt2) * canvas.clientWidth) / (1852 * range);
+                const leg2angle = bearingToRad(leg2wpt1.initialBearingTo(leg2wpt2));
 
-                context.lineTo(x += distance * Math.cos(angle), y += distance * -Math.sin(angle));
+                context.arcTo(
+                    x += leg1dist * Math.cos(leg1angle),
+                    y += leg1dist * -Math.sin(leg1angle),
+                    x + leg2dist * Math.cos(leg2angle),
+                    y + leg2dist * -Math.sin(leg2angle),
+                    (transitions[i].radius * canvas.clientWidth) / range,
+                );
 
                 context.save();
                 context.translate(x, y);
                 context.rotate(degToRad(-rotation));
                 context.translate(-x, -y);
-                context.fillText(waypoint.ident, x, y);
+                context.fillText(legs[i].wpt2.ident, x, y);
                 context.restore();
             }
             context.lineWidth = outlineWidth;
@@ -61,7 +82,13 @@ export const Route: React.FC<RouteProps> = ({
             context.strokeStyle = strokeColor;
             context.stroke();
         });
-    }, [layerController, waypoints, centerLla, range]);
+    };
+
+    useEffect(updatePosition, [centerLla, range, layerController]);
+    useEffect(repaint, [
+        dx, dy, legs, transitions, strokeWidth, strokeColor, outlineWidth,
+        outlineColor, fontFamily, fontSize, fontColor, rotation, layerController,
+    ]);
 
     return <></>;
 };
