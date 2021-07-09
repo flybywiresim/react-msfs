@@ -56,6 +56,8 @@ export const Route: React.FC<RouteProps> = ({
     const latLonFromWaypoint = (waypoint: WayPoint) => new LatLon(waypoint.infos.coordinates.lat, waypoint.infos.coordinates.long);
 
     const updatePosition = () => {
+        if (legs.length < 1) return;
+
         const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
         const startLatLong = latLonFromWaypoint(legs[0].wpt1);
 
@@ -67,6 +69,8 @@ export const Route: React.FC<RouteProps> = ({
     };
 
     const repaint = () => {
+        if (legs.length < 1) return;
+
         layerController?.use((canvas, context) => {
             let [x, y] = [(canvas.clientWidth / 2) + dx, (canvas.clientHeight / 2) + dy];
 
