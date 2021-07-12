@@ -1,6 +1,8 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import LatLon from 'geodesy/latlon-ellipsoidal-vincenty';
 import { BingMap } from './BingMap';
 import { CanvasLayer, CanvasLayerController } from './CanvasLayer';
+import { bearingToRad, degToRad } from '../utils';
 import { SimVarProvider } from '../hooks';
 import { Route } from './Route';
 import { Icon } from './Icon';
@@ -17,7 +19,7 @@ export type BingMapProps = {
 
 const DEFAULT_RANGE = 80;
 
-export const CanvasMap: FC<BingMapProps> = ({
+export const CanvasMap: React.FC<BingMapProps> = ({
     bingConfigFolder,
     mapId,
     centerLla,
@@ -27,6 +29,7 @@ export const CanvasMap: FC<BingMapProps> = ({
 }) => {
     const [mapLayerController, setMapLayerController] = useState<CanvasLayerController>();
     const [iconLayerController, setIconLayerController] = useState<CanvasLayerController>();
+    const [updateIcons, setUpdateIcons] = useState(false);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +37,36 @@ export const CanvasMap: FC<BingMapProps> = ({
     if (mapContainerRef.current) {
         mapSize = Math.hypot(mapContainerRef.current.clientWidth, mapContainerRef.current.clientHeight);
     }
+
+    const triggerRedrawIcons = () => setUpdateIcons(!updateIcons);
+
+    const redrawIcons = () => {
+        iconLayerController?.use((canvas, context) => {
+            context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+            React.Children.forEach(children, (child: React.ReactElement) => {
+                if (child.type === Icon && child.props.icon && child.props.icon.complete) {
+                    const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
+                    const startLatLong = new LatLon(child.props.positionLatLong.lat, child.props.positionLatLong.long);
+
+                    const distanceToStart = mapLatLong.distanceTo(startLatLong) / (1.29 * range);
+                    const angleToStart = bearingToRad(mapLatLong.initialBearingTo(startLatLong)) || 0;
+
+                    const x = (canvas.clientWidth / 2) + distanceToStart * Math.cos(angleToStart);
+                    const y = (canvas.clientWidth / 2) + distanceToStart * -Math.sin(angleToStart);
+
+                    context.save();
+                    context.translate(x, y);
+                    context.rotate(degToRad(child.props.rotation));
+                    context.translate(-child.props.iconWidth / 2, -child.props.iconHeight / 2);
+                    context.drawImage(child.props.icon, 0, 0, child.props.iconWidth, child.props.iconHeight);
+                    context.restore();
+                }
+            });
+        });
+    };
+
+    useEffect(redrawIcons, [updateIcons, centerLla, range, children, iconLayerController]);
 
     return (
         <div ref={mapContainerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -69,7 +102,7 @@ export const CanvasMap: FC<BingMapProps> = ({
                                 return React.cloneElement(child, { layerController: mapLayerController, centerLla, range, rotation });
                             }
                             if (child.type === Icon) {
-                                return React.cloneElement(child, { layerController: iconLayerController, centerLla, range });
+                                return React.cloneElement(child, { triggerRedrawIcons });
                             }
                             return child;
                         })}
