@@ -45,7 +45,7 @@ export const CanvasMap: React.FC<BingMapProps> = ({
             context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
             React.Children.forEach(children, (child: React.ReactElement) => {
-                if (child.type === Icon && child.props.icon && child.props.icon.complete) {
+                if (child.type === Icon) {
                     const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
                     const startLatLong = new LatLon(child.props.positionLatLong.lat, child.props.positionLatLong.long);
 
@@ -59,7 +59,42 @@ export const CanvasMap: React.FC<BingMapProps> = ({
                     context.translate(x, y);
                     context.rotate(degToRad(child.props.rotation));
                     context.translate(-child.props.iconWidth / 2, -child.props.iconHeight / 2);
-                    context.drawImage(child.props.icon, 0, 0, child.props.iconWidth, child.props.iconHeight);
+                    if (child.props.icon && child.props.icon.complete) {
+                        context.drawImage(child.props.icon, 0, 0, child.props.iconWidth, child.props.iconHeight);
+                    }
+                    if (child.props.text) {
+                        let textX;
+                        let textY;
+                        switch (child.props.textPosition) {
+                        case 'top':
+                            context.textBaseline = 'bottom';
+                            context.textAlign = 'center';
+                            textX = child.props.iconHeight / 2;
+                            textY = 0;
+                            break;
+                        case 'left':
+                            context.textBaseline = 'middle';
+                            context.textAlign = 'right';
+                            textX = -child.props.iconWidth / 4;
+                            textY = child.props.iconHeight / 2;
+                            break;
+                        case 'bottom':
+                            context.textBaseline = 'top';
+                            context.textAlign = 'center';
+                            textX = child.props.iconHeight / 2;
+                            textY = child.props.iconWidth * 0.75;
+                            break;
+                        case 'right':
+                        default:
+                            context.textBaseline = 'middle';
+                            context.textAlign = 'left';
+                            textX = child.props.iconWidth * 1.25;
+                            textY = child.props.iconHeight / 2;
+                        }
+                        context.fillStyle = child.props.textFill;
+                        context.font = `${child.props.fontSize}px ${child.props.fontFamily}`;
+                        context.fillText(child.props.text, textX, textY);
+                    }
                     context.restore();
                 }
             });
