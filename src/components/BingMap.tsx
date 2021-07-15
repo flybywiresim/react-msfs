@@ -55,7 +55,7 @@ export const BingMap: FC<BingMapProps> = ({ configFolder, mapId, range = DEFAULT
                 mapRef.current.setVisible(true);
 
                 const lla = new LatLongAlt(centerLla.lat, centerLla.long);
-                const radius = (range / 2) * RANGE_CONSTANT;
+                const radius = range * RANGE_CONSTANT;
 
                 mapRef.current.setParams({ lla, radius });
 
@@ -69,7 +69,7 @@ export const BingMap: FC<BingMapProps> = ({ configFolder, mapId, range = DEFAULT
     useEffect(() => {
         if (mapRef.current) {
             const lla = new LatLongAlt(centerLla.lat, centerLla.long);
-            const radius = (range / 2) * RANGE_CONSTANT;
+            const radius = range * RANGE_CONSTANT;
 
             mapRef.current.setParams({ lla, radius });
         }

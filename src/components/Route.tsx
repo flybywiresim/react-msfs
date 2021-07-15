@@ -61,7 +61,7 @@ export const Route: React.FC<RouteProps> = ({
         const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
         const startLatLong = latLonFromWaypoint(legs[0].wpt1);
 
-        const distanceToStart = (mapLatLong.distanceTo(startLatLong)) / (1.29 * range);
+        const distanceToStart = (mapLatLong.distanceTo(startLatLong)) / (3.02 * range);
         const angleToStart = bearingToRad(mapLatLong.initialBearingTo(startLatLong)) || 0;
 
         setDx(distanceToStart * Math.cos(angleToStart));
@@ -84,9 +84,9 @@ export const Route: React.FC<RouteProps> = ({
                 const leg1wpt2 = latLonFromWaypoint(legs[i].wpt2);
                 const leg2wpt1 = latLonFromWaypoint(legs[i + 1].wpt1);
                 const leg2wpt2 = latLonFromWaypoint(legs[i + 1].wpt2);
-                const leg1dist = (leg1wpt1.distanceTo(leg1wpt2) * canvas.clientWidth) / (1852 * range);
+                const leg1dist = leg1wpt1.distanceTo(leg1wpt2) / (3.02 * range);
                 const leg1angle = bearingToRad(leg1wpt1.initialBearingTo(leg1wpt2));
-                const leg2dist = (leg2wpt1.distanceTo(leg2wpt2) * canvas.clientWidth) / (1852 * range);
+                const leg2dist = leg2wpt1.distanceTo(leg2wpt2) / (3.02 * range);
                 const leg2angle = bearingToRad(leg2wpt1.initialBearingTo(leg2wpt2));
 
                 context.arcTo(

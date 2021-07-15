@@ -33,9 +33,11 @@ export const CanvasMap: React.FC<BingMapProps> = ({
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
 
-    let mapSize;
+    let mapSize = 100;
+    let mapRange = range;
     if (mapContainerRef.current) {
         mapSize = Math.hypot(mapContainerRef.current.clientWidth, mapContainerRef.current.clientHeight);
+        mapRange = range / (mapContainerRef.current.clientHeight / mapSize);
     }
 
     const triggerRedrawIcons = () => setUpdateIcons(!updateIcons);
@@ -49,7 +51,7 @@ export const CanvasMap: React.FC<BingMapProps> = ({
                     const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
                     const startLatLong = new LatLon(child.props.positionLatLong.lat, child.props.positionLatLong.long);
 
-                    const distanceToStart = mapLatLong.distanceTo(startLatLong) / (1.29 * range);
+                    const distanceToStart = mapLatLong.distanceTo(startLatLong) / (3.02 * range);
                     const angleToStart = bearingToRad(mapLatLong.initialBearingTo(startLatLong)) || 0;
 
                     const x = (canvas.clientWidth / 2) + distanceToStart * Math.cos(angleToStart);
@@ -116,9 +118,9 @@ export const CanvasMap: React.FC<BingMapProps> = ({
                     top: '50%',
                 }}
             >
-                <CanvasLayer onUpdatedDrawingCanvasController={setMapLayerController} containerRef={mapContainerRef} />
-                <CanvasLayer onUpdatedDrawingCanvasController={setIconLayerController} containerRef={mapContainerRef} />
-                <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={range} />
+                <CanvasLayer onUpdatedDrawingCanvasController={setMapLayerController} canvasSize={mapSize} />
+                <CanvasLayer onUpdatedDrawingCanvasController={setIconLayerController} canvasSize={mapSize} />
+                <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={mapRange} />
                 <div
                     style={{
                         display: 'flex',
