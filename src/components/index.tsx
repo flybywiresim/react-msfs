@@ -11,6 +11,7 @@ export type BingMapProps = {
     bingConfigFolder: string;
     mapId: string;
     centerLla: { lat: number; long: number };
+    showMap?: boolean;
     range?: number;
     heading?: number;
     rotation?: number;
@@ -23,6 +24,7 @@ export const CanvasMap: React.FC<BingMapProps> = ({
     bingConfigFolder,
     mapId,
     centerLla,
+    showMap = true,
     range = DEFAULT_RANGE,
     rotation = 0,
     children = null,
@@ -121,7 +123,7 @@ export const CanvasMap: React.FC<BingMapProps> = ({
             >
                 <CanvasLayer onUpdatedDrawingCanvasController={setMapLayerController} canvasSize={mapSize} />
                 <CanvasLayer onUpdatedDrawingCanvasController={setIconLayerController} canvasSize={mapSize} />
-                <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={mapRange} />
+                {showMap && <BingMap configFolder={bingConfigFolder} mapId={mapId} centerLla={centerLla} range={mapRange} />}
                 <div
                     style={{
                         display: 'flex',
