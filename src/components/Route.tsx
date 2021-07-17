@@ -79,21 +79,22 @@ export const Route: React.FC<RouteProps> = ({
             context.beginPath();
             context.font = `${fontSize}px ${fontFamily}`;
             context.fillStyle = fontColor;
-            for (let i = 0; i < legs.length - 1; i++) {
-                const leg1wpt1 = latLonFromWaypoint(legs[i].wpt1);
-                const leg1wpt2 = latLonFromWaypoint(legs[i].wpt2);
-                const leg2wpt1 = latLonFromWaypoint(legs[i + 1].wpt1);
-                const leg2wpt2 = latLonFromWaypoint(legs[i + 1].wpt2);
-                const leg1dist = leg1wpt1.distanceTo(leg1wpt2) / (3.02 * range);
-                const leg1angle = bearingToRad(leg1wpt1.initialBearingTo(leg1wpt2));
-                const leg2dist = leg2wpt1.distanceTo(leg2wpt2) / (3.02 * range);
-                const leg2angle = bearingToRad(leg2wpt1.initialBearingTo(leg2wpt2));
 
+            const legData = legs.map((leg) => {
+                const wpt1 = latLonFromWaypoint(leg.wpt1);
+                const wpt2 = latLonFromWaypoint(leg.wpt2);
+                const dist = wpt1.distanceTo(wpt2) / (3.02 * range);
+                const angle = bearingToRad(wpt1.initialBearingTo(wpt2));
+
+                return { dist, angle };
+            });
+
+            for (let i = 0; i < legData.length - 1; i++) {
                 context.arcTo(
-                    x += leg1dist * Math.cos(leg1angle),
-                    y += leg1dist * -Math.sin(leg1angle),
-                    x + leg2dist * Math.cos(leg2angle),
-                    y + leg2dist * -Math.sin(leg2angle),
+                    x += legData[i].dist * Math.cos(legData[i].angle),
+                    y += legData[i].dist * -Math.sin(legData[i].angle),
+                    x + legData[i + 1].dist * Math.cos(legData[i + 1].angle),
+                    y + legData[i + 1].dist * -Math.sin(legData[i + 1].angle),
                     (transitions[i].radius * canvas.clientWidth) / range,
                 );
 

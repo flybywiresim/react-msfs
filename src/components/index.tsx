@@ -46,9 +46,10 @@ export const CanvasMap: React.FC<BingMapProps> = ({
         iconLayerController?.use((canvas, context) => {
             context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
+            const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
+
             React.Children.forEach(children, (child: React.ReactElement) => {
-                if (child.type === Icon) {
-                    const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
+                if (child && child.type === Icon) {
                     const startLatLong = new LatLon(child.props.positionLatLong.lat, child.props.positionLatLong.long);
 
                     const distanceToStart = mapLatLong.distanceTo(startLatLong) / (3.02 * range);
@@ -135,6 +136,7 @@ export const CanvasMap: React.FC<BingMapProps> = ({
                 >
                     <SimVarProvider>
                         {React.Children.map(children, (child: any) => {
+                            if (!child) return child;
                             if (child.type === Route) {
                                 return React.cloneElement(child, { layerController: mapLayerController, centerLla, range, rotation });
                             }
