@@ -1,5 +1,5 @@
-import React from 'react';
-import { getRootElement } from '../render';
+import React, { useEffect, useState } from 'react';
+import { getRootElement } from '../utils/render';
 
 export const useUpdate = (handler: (deltaTime: number) => void) => {
     // Logic based on https://usehooks.com/useEventListener/
@@ -60,4 +60,27 @@ export const useInteractionEvents = (events: string[], handler: (any?) => void):
     }, [
         ...events,
     ]);
+};
+
+/**
+ * Allows for pre-loading of images by triggering a state update when the image has been loaded.
+ * @param imagePath
+ */
+export const useImageLoader = (imagePath: string) => {
+    const [image, setImage] = useState<HTMLImageElement>();
+
+    const loadImage = (path) => {
+        const image = new Image();
+        return new Promise<HTMLImageElement>((resolve, reject) => {
+            image.onload = () => resolve(image);
+            image.onerror = reject;
+            image.src = path;
+        });
+    };
+
+    useEffect(() => {
+        loadImage(imagePath).then((img) => setImage(img));
+    }, []);
+
+    return image;
 };

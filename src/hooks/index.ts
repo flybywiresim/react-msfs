@@ -1,3 +1,3 @@
 export * from './base';
-export * from './simVars';
 export * from './persistence';
+export * from './simVars';

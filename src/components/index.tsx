@@ -1,16 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import LatLon from 'geodesy/latlon-ellipsoidal-vincenty';
-import { BingMap } from './BingMap';
 import { CanvasLayer, CanvasLayerController } from './CanvasLayer';
-import { bearingToRad, degToRad } from '../utils';
-import { SimVarProvider } from '../hooks';
-import { Route } from './Route';
+import { degToRad, GeoArc, latLonToPx } from '../utils';
+import { Geometry } from './Geometry';
+import { BingMap } from './BingMap';
 import { Icon } from './Icon';
+import { SimVarProvider } from '../hooks';
 
-export type BingMapProps = {
+declare class LatLongAlt {
+    lat: number;
+
+    long: number;
+
+    constructor(lat: number, long: number);
+}
+
+type CanvasMapProps = {
     bingConfigFolder: string;
     mapId: string;
-    centerLla: { lat: number; long: number };
+    centerLla: LatLongAlt;
     showMap?: boolean;
     range?: number;
     heading?: number;
@@ -20,7 +28,7 @@ export type BingMapProps = {
 
 const DEFAULT_RANGE = 80;
 
-export const CanvasMap: React.FC<BingMapProps> = ({
+export const CanvasMap: React.FC<CanvasMapProps> = ({
     bingConfigFolder,
     mapId,
     centerLla,
@@ -32,6 +40,8 @@ export const CanvasMap: React.FC<BingMapProps> = ({
     const [mapLayerController, setMapLayerController] = useState<CanvasLayerController>();
     const [iconLayerController, setIconLayerController] = useState<CanvasLayerController>();
     const [updateIcons, setUpdateIcons] = useState(false);
+    const [updateGeometry, setUpdateGeometry] = useState(false);
+    const [mapCenter, setMapCenter] = useState(new LatLon(centerLla.lat, centerLla.long));
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,31 +52,26 @@ export const CanvasMap: React.FC<BingMapProps> = ({
         mapRange = range / (mapContainerRef.current.clientHeight / mapSize);
     }
 
-    const triggerRedrawIcons = () => setUpdateIcons(!updateIcons);
+    const triggerRepaintIcons = () => setUpdateIcons(!updateIcons);
 
-    const redrawIcons = () => {
+    const repaintIcons = () => {
         iconLayerController?.use((canvas, context) => {
             context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-            const mapLatLong = new LatLon(centerLla.lat, centerLla.long);
-
             React.Children.forEach(children, (child: React.ReactElement) => {
                 if (child && child.type === Icon) {
-                    const startLatLong = new LatLon(child.props.positionLatLong.lat, child.props.positionLatLong.long);
-
-                    const distanceToStart = mapLatLong.distanceTo(startLatLong) / (3.02 * range);
-                    const angleToStart = bearingToRad(mapLatLong.initialBearingTo(startLatLong)) || 0;
-
-                    const x = (canvas.clientWidth / 2) + distanceToStart * Math.cos(angleToStart);
-                    const y = (canvas.clientWidth / 2) + distanceToStart * -Math.sin(angleToStart);
+                    const coords = new LatLon(child.props.position.lat, child.props.position.long);
+                    const [x, y] = latLonToPx(coords, mapCenter, range, mapSize);
 
                     context.save();
                     context.translate(x, y);
                     context.rotate(degToRad(child.props.rotation));
                     context.translate(-child.props.iconWidth / 2, -child.props.iconHeight / 2);
+
                     if (child.props.icon && child.props.icon.complete) {
                         context.drawImage(child.props.icon, 0, 0, child.props.iconWidth, child.props.iconHeight);
                     }
+
                     if (child.props.text) {
                         let textX;
                         let textY;
@@ -106,7 +111,52 @@ export const CanvasMap: React.FC<BingMapProps> = ({
         });
     };
 
-    useEffect(redrawIcons, [updateIcons, centerLla, range, children, iconLayerController]);
+    const triggerRepaintGeometry = () => setUpdateGeometry(!updateGeometry);
+
+    const repaintGeometry = () => {
+        mapLayerController?.use((canvas, context) => {
+            context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+            React.Children.forEach(children, (child: React.ReactElement) => {
+                if (child && child.type === Geometry) {
+                    if (child.props.geoPaths.length < 1) return;
+
+                    const newPath = new Path2D();
+                    newPath.moveTo(...latLonToPx(child.props.geoPaths[0].start, mapCenter, range, mapSize));
+
+                    for (const path of child.props.geoPaths) {
+                        const [endX, endY] = latLonToPx(path.end, mapCenter, range, mapSize);
+
+                        if (path instanceof GeoArc) {
+                            const [controlX, controlY] = latLonToPx(path.control, mapCenter, range, mapSize);
+                            newPath.arcTo(controlX, controlY, endX, endY, (path.radius * mapSize) / (3.02 * range));
+                        } else {
+                            newPath.lineTo(endX, endY);
+                        }
+                    }
+
+                    context.beginPath();
+                    context.lineWidth = child.props.outlineWidth ?? 1;
+                    context.strokeStyle = child.props.outlineColor ?? 'white';
+                    context.stroke(newPath);
+
+                    context.beginPath();
+                    context.lineWidth = child.props.strokeWidth ?? 1;
+                    context.strokeStyle = child.props.strokeColor ?? 'white';
+                    context.stroke(newPath);
+                }
+            });
+        });
+    };
+
+    useEffect(repaintIcons, [updateIcons, centerLla, range, children, iconLayerController]);
+    useEffect(repaintGeometry, [updateGeometry, centerLla, range, children, mapLayerController]);
+
+    useEffect(() => {
+        if (centerLla.lat !== mapCenter.lat || centerLla.long !== mapCenter.lon) {
+            setMapCenter(new LatLon(centerLla.lat, centerLla.long));
+        }
+    }, [centerLla]);
 
     return (
         <div ref={mapContainerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -139,11 +189,11 @@ export const CanvasMap: React.FC<BingMapProps> = ({
                     <SimVarProvider>
                         {React.Children.map(children, (child: any) => {
                             if (!child) return child;
-                            if (child.type === Route) {
-                                return React.cloneElement(child, { layerController: mapLayerController, centerLla, range, rotation });
+                            if (child.type === Geometry) {
+                                return React.cloneElement(child, { triggerRepaintGeometry });
                             }
                             if (child.type === Icon) {
-                                return React.cloneElement(child, { triggerRedrawIcons });
+                                return React.cloneElement(child, { triggerRepaintIcons });
                             }
                             return child;
                         })}
