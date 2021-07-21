@@ -1,5 +1,5 @@
 /* eslint-disable lines-between-class-members */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 declare class LatLongAlt {
     lat: number;
@@ -13,7 +13,6 @@ interface IconProps {
     iconWidth?: number;
     iconHeight?: number;
     rotation?: number;
-    moving?: boolean;
     text?: string;
     textFill?: string;
     textPosition?: string;
@@ -30,7 +29,6 @@ export const Icon: React.FC<IconProps> = ({
     iconWidth,
     iconHeight,
     rotation = 0,
-    moving = false,
     text,
     textFill,
     textPosition,
@@ -38,6 +36,8 @@ export const Icon: React.FC<IconProps> = ({
     fontSize,
     triggerRepaintIcons,
 }) => {
+    const [currentPosition, setCurrentPosition] = useState(position);
+
     useEffect(triggerRepaintIcons, [
         icon,
         iconWidth,
@@ -50,7 +50,12 @@ export const Icon: React.FC<IconProps> = ({
         fontSize,
     ]);
 
-    if (moving) useEffect(triggerRepaintIcons, [position]);
+    useEffect(() => {
+        if (position.lat !== currentPosition.lat || position.long !== currentPosition.long) {
+            setCurrentPosition(position);
+            triggerRepaintIcons();
+        }
+    }, [position]);
 
     return <></>;
 };
