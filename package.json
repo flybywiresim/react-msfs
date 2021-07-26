@@ -1,19 +1,38 @@
 {
-  "name": "react-msfs",
-  "version": "0.1.0",
-  "devDependencies": {
-    "@flybywiresim/eslint-config": "^0.1.0",
-    "@types/react": "^17.0.11",
-    "@types/react-dom": "^17.0.8",
-    "@typescript-eslint/eslint-plugin": "^4.27.0",
-    "@typescript-eslint/parser": "^4.27.0",
-    "eslint": "^7.29.0"
-  },
-  "peerDependencies": {
-    "react": "^17.x",
-    "react-dom": "^17.x"
-  },
-  "dependencies": {
-    "geodesy": "^2.2.1"
-  }
+    "name": "react-msfs",
+    "version": "0.1.1",
+    "description": "React utilities and hooks for Microsoft Flight Simulator UIs and displays",
+    "author": "FlyByWire Simulations, Synaptic Simulations",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "files": [
+        "dist"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/flybywiresim/react-msfs.git"
+    },
+    "scripts": {
+        "build": "rollup -c rollup.config.js"
+    },
+    "devDependencies": {
+        "@flybywiresim/eslint-config": "^0.1.0",
+        "@rollup/plugin-commonjs": "^19.0.1",
+        "@rollup/plugin-json": "^4.1.0",
+        "@rollup/plugin-node-resolve": "^13.0.4",
+        "@rollup/plugin-typescript": "^8.2.3",
+        "@types/geodesy": "^2.2.2",
+        "@types/react": "^17.0.11",
+        "@types/react-dom": "^17.0.8",
+        "@typescript-eslint/eslint-plugin": "^4.27.0",
+        "@typescript-eslint/parser": "^4.27.0",
+        "eslint": "^7.29.0"
+    },
+    "peerDependencies": {
+        "react": "^17.x",
+        "react-dom": "^17.x"
+    },
+    "dependencies": {
+        "geodesy": "^2.2.1"
+    }
 }

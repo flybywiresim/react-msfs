@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getRootElement } from '../utils/render';
+import { getRootElement } from '../utils';
 
 export const useUpdate = (handler: (deltaTime: number) => void) => {
     // Logic based on https://usehooks.com/useEventListener/
@@ -84,6 +84,8 @@ export const useImageLoader = (imagePath: string) => {
 
     return image;
 };
+
+declare const Coherent: { on: Function };
 
 export const useCoherentEvent = (event: string, handler: (any?) => void): void => {
     const savedHandler = React.useRef(handler);
