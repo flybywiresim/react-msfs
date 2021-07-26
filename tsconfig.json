@@ -1,7 +1,14 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "jsx": "preserve",
-    "lib": ["es2020", "dom"]
-  }
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "jsx": "react",
+        "lib": [
+            "es2020",
+            "dom"
+        ],
+        "target": "es6",
+        "moduleResolution": "node",
+        "declaration": true,
+        "declarationDir": "dist/"
+    }
 }

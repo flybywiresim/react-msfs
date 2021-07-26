@@ -17,7 +17,12 @@
 
 // eslint-disable-next-line max-classes-per-file
 import LatLon from 'geodesy/latlon-ellipsoidal-vincenty';
-import { LatLongAlt } from '../types';
+
+declare class LatLongAlt {
+    lat: number;
+
+    long: number;
+}
 
 export class GeoPath {
     start: LatLon;
