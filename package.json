@@ -1,6 +1,6 @@
 {
     "name": "react-msfs",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "React utilities and hooks for Microsoft Flight Simulator UIs and displays",
     "author": "FlyByWire Simulations, Synaptic Simulations",
     "main": "dist/index.js",
@@ -8,6 +8,7 @@
     "files": [
         "dist"
     ],
+    "types": "dist/index.d.ts",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/flybywiresim/react-msfs.git"
