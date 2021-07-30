@@ -203,3 +203,8 @@ export const CanvasMap: React.FC<CanvasMapProps> = ({
         </div>
     );
 };
+
+export * from './BingMap';
+export * from './CanvasLayer';
+export * from './Geometry';
+export * from './Icon';
