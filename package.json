@@ -1,6 +1,6 @@
 {
     "name": "react-msfs",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "description": "React utilities and hooks for Microsoft Flight Simulator UIs and displays",
     "author": "FlyByWire Simulations, Synaptic Simulations",
     "main": "dist/index.js",
