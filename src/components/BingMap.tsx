@@ -15,7 +15,7 @@ declare class NetBingMap extends HTMLElement {
 }
 
 declare class SvgMapConfig {
-    generateBing(_id: number): BingMapConfig;
+    generateBingMap(bingMap: NetBingMap): void;
     load(path: string, callback): BingMapConfig;
 }
 
@@ -45,7 +45,7 @@ export const BingMap: React.FC<BingMapProps> = ({ configFolder, mapId, range = D
             svgMapConfig.load(configFolder, () => {
                 console.log(`[ReactBingMap (${mapId})] NetBingMap config loaded`);
 
-                mapRef.current.addConfig(svgMapConfig.generateBing(0));
+                svgMapConfig.generateBingMap(mapRef.current);
                 mapRef.current.setConfig(0);
 
                 mapRef.current.setBingId(mapId);
