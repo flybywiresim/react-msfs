@@ -1,6 +1,8 @@
-# React Map Components for MSFS
+# `react-msfs`
 
 ## Hooks
+
+To be written. Most hooks are already documented in their JSDoc.
 
 ### `useImageLoader`
 The issue with `HTMLImageElement`s is that loading the actual image is an asynchronous task and would make drawing `Icon`s on a canvas layer very difficult. The `useImageLoader` allows you to preload these elements and pass them as parameters to the `Icon` component. Once the image is successfully loaded, the state is updated and the image can be drawn on the canvas.
