@@ -4,7 +4,28 @@
 
 To be written. Most hooks are already documented in their JSDoc.
 
-### `useImageLoader`
+### Game hooks
+
+It is possible to hook into avionics lifecycle / interaction events.
+
+#### `useUpdate`
+Triggers a callback when an update is performed in the main loop of the instrument;
+
+#### `useInteractionEvent`
+Triggers a callback when an interaction event (`H`-event) is received by the instrument.
+
+### SimVar hooks
+
+Hooks are provided to interface with MSFS SimVars and GameVars.
+
+The following features are supported to make interaction easier:
+
+- use of split SimVar + K-event structure for changing value;
+- use of SimVar and H-event to only refresh when a certain interaction event is fired.
+
+### Misc. hooks
+
+#### `useImageLoader`
 The issue with `HTMLImageElement`s is that loading the actual image is an asynchronous task and would make drawing `Icon`s on a canvas layer very difficult. The `useImageLoader` allows you to preload these elements and pass them as parameters to the `Icon` component. Once the image is successfully loaded, the state is updated and the image can be drawn on the canvas.
 ```tsx
 const airplaneIcon = useImageLoader('/Pages/VCockpit/Instruments/a22x/assets/MAP/ND_AIRPLANE.svg');
